@@ -11,12 +11,7 @@ defmodule Coherence.RequireLogin do
 
   @behaviour Plug
 
-  @dialyzer [
-    {:nowarn_function, call: 2},
-    {:nowarn_function, init: 1}
-  ]
-
-  @spec init(Keyword.t()) :: [tuple]
+  @spec init(Keyword.t()) :: map()
   def init(options) do
     %{option: options}
   end

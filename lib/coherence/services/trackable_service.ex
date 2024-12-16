@@ -51,7 +51,7 @@ defmodule Coherence.TrackableService do
 
   @type schema :: Ecto.Schema.t()
   @type conn :: Plug.Conn.t()
-  @type params :: Map.t()
+  @type params :: map()
 
   @doc """
   Track user login details.
@@ -95,7 +95,7 @@ defmodule Coherence.TrackableService do
     schema = schema(Trackable)
 
     changeset =
-      Controller.changeset(:session, schema, schema.__struct__, %{
+      Controller.changeset(:session, schema, schema.__struct__(), %{
         action: "login",
         sign_in_count: trackable.sign_in_count + 1,
         current_sign_in_at: NaiveDateTime.utc_now(),
@@ -156,7 +156,7 @@ defmodule Coherence.TrackableService do
     Schemas.update!(changeset)
 
     changeset =
-      Controller.changeset(:session, schema, schema.__struct__, %{
+      Controller.changeset(:session, schema, schema.__struct__(), %{
         action: "logout",
         sign_in_count: trackable.sign_in_count,
         last_sign_in_at: trackable.current_sign_in_at,
@@ -213,7 +213,7 @@ defmodule Coherence.TrackableService do
     schema = schema(Trackable)
 
     changeset =
-      Controller.changeset(:session, schema, schema.__struct__, %{
+      Controller.changeset(:session, schema, schema.__struct__(), %{
         action: action,
         sign_in_count: trackable.sign_in_count,
         last_sign_in_at: trackable.last_sign_in_at,
@@ -227,10 +227,13 @@ defmodule Coherence.TrackableService do
 
   defp last_at_and_ip(conn, schema) do
     now = NaiveDateTime.utc_now()
-    ip = Plug.Conn.get_peer_data(conn)
-         |> Map.get(:address)
-         |> check_x_forwarded_for(conn)
-         |> ip2str()
+
+    ip =
+      Plug.Conn.get_peer_data(conn)
+      |> Map.get(:address)
+      |> check_x_forwarded_for(conn)
+      |> ip2str()
+
     cond do
       is_nil(schema.last_sign_in_at) and is_nil(schema.current_sign_in_at) ->
         {now, ip, ip, now}
@@ -251,8 +254,10 @@ defmodule Coherence.TrackableService do
 
   defp check_x_forwarded_for(real_ip, conn) do
     case Plug.Conn.get_req_header(conn, "x-forwarded-for") do
-      [] -> real_ip
-      [ip|_] ->
+      [] ->
+        real_ip
+
+      [ip | _] ->
         {:ok, tuple_ip} = :inet_parse.address(to_charlist(ip))
         tuple_ip
     end

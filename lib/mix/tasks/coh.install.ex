@@ -249,9 +249,7 @@ defmodule Mix.Tasks.Coh.Install do
         config
 
       _ ->
-        if Mix.shell().yes?(
-             "Cannot find web path #{web_path}. Are you sure you want to continue?"
-           ) do
+        if Mix.shell().yes?("Cannot find web path #{web_path}. Are you sure you want to continue?") do
           config
         else
           Mix.raise("Cannot find web path #{web_path}")
@@ -421,7 +419,7 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp get_compiled_model(%{user_schema: user_schema} = config) do
     user_schema = Module.concat(user_schema, nil)
-    Map.put(config, :model_found?, Code.ensure_compiled(user_schema))
+    Map.put(config, :model_found?, not match?({:error, _}, Code.ensure_compiled(user_schema)))
   end
 
   def find_existing_model(%{model_found?: false, user_schema: user_schema} = config, path) do
@@ -509,7 +507,7 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp create_or_alter_model(config, name) do
     table_name = config[:user_table_name]
-    # user_schema = Module.concat user_schema, nil
+
     if config[:model_found?] do
       {:alter, "add_coherence_to_#{name}", [], []}
     else
@@ -551,7 +549,7 @@ defmodule Mix.Tasks.Coh.Install do
 
     name =
       config[:user_schema]
-      |> module_to_string
+      |> module_to_string()
       |> String.downcase()
 
     {verb, migration_name, initial_fields, constraints} = create_or_alter_model(config, name)
@@ -610,9 +608,7 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp gen_invitable_migration(config), do: config
 
-  defp gen_rememberable_migration(
-         %{rememberable: true, migrations: true, boilerplate: true} = config
-       ) do
+  defp gen_rememberable_migration(%{rememberable: true, migrations: true, boilerplate: true} = config) do
     table_name = config[:user_table_name]
 
     do_gen_migration(config, "create_coherence_rememberable", fn repo, _path, file, name ->
@@ -638,9 +634,7 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp gen_rememberable_migration(config), do: config
 
-  defp gen_trackable_migration(
-         %{trackable_table: true, migrations: true, boilerplate: true} = config
-       ) do
+  defp gen_trackable_migration(%{trackable_table: true, migrations: true, boilerplate: true} = config) do
     table_name = config[:user_table_name]
 
     do_gen_migration(config, "create_coherence_trackable", fn repo, _path, file, name ->
@@ -777,9 +771,7 @@ defmodule Mix.Tasks.Coh.Install do
   ################
   # Web
 
-  defp gen_coherence_web(
-         %{web: true, boilerplate: true, binding: binding, web_path: web_path} = config
-       ) do
+  defp gen_coherence_web(%{web: true, boilerplate: true, binding: binding, web_path: web_path} = config) do
     copy_from(
       paths(),
       "priv/templates/coh.install",
@@ -799,9 +791,7 @@ defmodule Mix.Tasks.Coh.Install do
   ################
   # Messages
 
-  defp gen_coherence_messages(
-         %{messages: true, boilerplate: true, binding: binding, web_path: web_path} = config
-       ) do
+  defp gen_coherence_messages(%{messages: true, boilerplate: true, binding: binding, web_path: web_path} = config) do
     copy_from(
       paths(),
       "priv/templates/coh.install",
@@ -871,9 +861,7 @@ defmodule Mix.Tasks.Coh.Install do
 
   def view_files, do: @view_files
 
-  def gen_coherence_views(
-        %{views: true, boilerplate: true, binding: binding, web_path: web_path} = config
-      ) do
+  def gen_coherence_views(%{views: true, boilerplate: true, binding: binding, web_path: web_path} = config) do
     files =
       @view_files
       |> Enum.filter(&validate_option(config, elem(&1, 0)))
@@ -955,17 +943,14 @@ defmodule Mix.Tasks.Coh.Install do
   ################
   # Mailer
 
-  defp gen_coherence_mailer(
-         %{binding: binding, use_email?: true, boilerplate: true, web_path: web_path} = config
-       ) do
+  defp gen_coherence_mailer(%{binding: binding, use_email?: true, boilerplate: true, web_path: web_path} = config) do
     copy_from(
       paths(),
       "priv/templates/coh.install/emails/coherence",
       "",
       binding,
       [
-        {:eex, "coherence_mailer.ex",
-         Path.join(web_path, "emails/coherence/coherence_mailer.ex")},
+        {:eex, "coherence_mailer.ex", Path.join(web_path, "emails/coherence/coherence_mailer.ex")},
         {:eex, "user_email.ex", Path.join(web_path, "emails/coherence/user_email.ex")}
       ],
       config
@@ -1309,8 +1294,8 @@ defmodule Mix.Tasks.Coh.Install do
 
     opts_names = Enum.map(opts, &elem(&1, 0))
 
-    with [] <- Enum.filter(opts_bin, &(not (&1 in @switch_names))),
-         [] <- Enum.filter(opts_names, &(not (&1 in @switch_names))) do
+    with [] <- Enum.filter(opts_bin, &(&1 not in @switch_names)),
+         [] <- Enum.filter(opts_names, &(&1 not in @switch_names)) do
       {opts_bin, opts}
     else
       list -> raise_option_errors(list)

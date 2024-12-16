@@ -12,30 +12,18 @@ defmodule Coherence.RegistrationControllerBase do
   """
   defmacro __using__(opts) do
     quote location: :keep do
-      alias Coherence.{Messages, Schema, Config, Controller}
-      # alias Coherence.Schemas
+      alias Coherence.{Config, Controller, Messages, Schema}
 
       require Config
       require Logger
 
       @type schema :: Ecto.Schema.t()
       @type conn :: Plug.Conn.t()
-      @type params :: Map.t()
-
-      @dialyzer [
-        {:nowarn_function, update: 2}
-      ]
+      @type params :: map()
 
       @schemas unquote(opts)[:schemas] || raise("Schemas option required")
 
       def schema(which), do: Coherence.Schemas.schema(which)
-
-      # plug Coherence.RequireLogin when action in ~w(show edit update delete)a
-      # plug Coherence.ValidateOption, :registerable
-      # plug :scrub_params, "registration" when action in [:create, :update]
-
-      # plug :layout_view, view: Coherence.RegistrationView, caller: __MODULE__
-      # plug :redirect_logged_in when action in [:new, :create]
 
       @doc """
       Render the new user form.
@@ -43,7 +31,7 @@ defmodule Coherence.RegistrationControllerBase do
       @spec new(conn, params) :: conn
       def new(conn, _params) do
         user_schema = Config.user_schema()
-        changeset = Controller.changeset(:registration, user_schema, user_schema.__struct__)
+        changeset = Controller.changeset(:registration, user_schema, user_schema.__struct__())
         render(conn, :new, email: "", changeset: changeset)
       end
 
@@ -60,7 +48,7 @@ defmodule Coherence.RegistrationControllerBase do
         :registration
         |> Controller.changeset(
           user_schema,
-          user_schema.__struct__,
+          user_schema.__struct__(),
           Controller.permit(
             registration_params,
             Config.registration_permitted_attributes() ||
@@ -133,7 +121,7 @@ defmodule Coherence.RegistrationControllerBase do
               Schema.permitted_attributes_default(:registration)
           )
         )
-        |> @schemas.update
+        |> @schemas.update()
         |> case do
           {:ok, user} ->
             if Config.get(:confirm_email_updates) &&
@@ -165,12 +153,8 @@ defmodule Coherence.RegistrationControllerBase do
       """
       @spec update(conn, params) :: conn
       def delete(conn, params) do
-        conn = Helpers.logout_user(conn)
+        conn = Coherence.Controller.logout_user(conn)
         redirect(conn, to: "/")
-        # user = Coherence.current_user(conn)
-        # conn = Controller.logout_user(conn)
-        # @schemas.delete!(user)
-        # respond_with(conn, :registration_delete_success, %{params: params})
       end
 
       defoverridable(

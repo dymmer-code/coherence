@@ -1,5 +1,5 @@
 defmodule Coherence.CoherenceView do
-  use Phoenix.HTML
+  use PhoenixHTMLHelpers
   use Phoenix.View, root: "web/templates/coherence"
   alias TestCoherenceWeb.Router.Helpers, as: Routes
 
@@ -39,7 +39,34 @@ end
 
 defmodule Coherence.LayoutView do
   use TestCoherenceWeb.Coherence, :view
-  # import TestCoherence.Web.Router.Helpers
+end
+
+defmodule TestCoherenceWeb.Coherence.RegistrationView do
+  use TestCoherenceWeb.Coherence, :view
+
+  def render("new.html", params) do
+    "new registration #{inspect(params)}"
+  end
+
+  def render("edit.html", params) do
+    "edit registration #{inspect(params)}"
+  end
+
+  def render("show.html", params) do
+    "show registration #{inspect(params)}"
+  end
+end
+
+defmodule TestCoherenceWeb.Coherence.PasswordView do
+  use TestCoherenceWeb.Coherence, :view
+
+  def render("edit.html", params) do
+    "edit password #{inspect(params)}"
+  end
+
+  def render("new.html", params) do
+    "new password #{inspect(params)}"
+  end
 end
 
 defmodule TestCoherenceWeb.Coherence.InvitationView do

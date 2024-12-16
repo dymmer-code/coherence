@@ -7,8 +7,6 @@ defmodule Coherence.ConfirmationControllerBase do
   """
   defmacro __using__(opts) do
     quote location: :keep do
-      use Timex
-
       alias Coherence.{ConfirmableService, Messages, Controller, Schema}
       alias Coherence.Schemas
 
@@ -24,7 +22,7 @@ defmodule Coherence.ConfirmationControllerBase do
 
       Request the user's email, reset the confirmation token and resend the email.
       """
-      @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+      @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
       def new(conn, _params) do
         user_schema = Config.user_schema()
         cs = Controller.changeset(:confirmation, user_schema, user_schema.__struct__)
@@ -36,7 +34,7 @@ defmodule Coherence.ConfirmationControllerBase do
       @doc """
       Create a new confirmation token and resend the email.
       """
-      @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+      @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
       def create(conn, %{"confirmation" => password_params} = params) do
         user_schema = Config.user_schema()
         email = password_params["email"]
@@ -80,7 +78,7 @@ defmodule Coherence.ConfirmationControllerBase do
       Validate that the confirmation token has not expired and sets `confirmation_sent_at`
       field to nil, marking the user as confirmed.
       """
-      @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+      @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
       def edit(conn, params) do
         user_schema = Config.user_schema()
         token = params["id"]

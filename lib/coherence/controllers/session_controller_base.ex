@@ -41,8 +41,6 @@ defmodule Coherence.SessionControllerBase do
   """
   defmacro __using__(opts) do
     quote location: :keep do
-      use Timex
-
       import Coherence.TrackableService, except: [track_login: 4]
       import Ecto.Query
 
@@ -53,7 +51,7 @@ defmodule Coherence.SessionControllerBase do
 
       @type schema :: Ecto.Schema.t()
       @type conn :: Plug.Conn.t()
-      @type params :: Map.t()
+      @type params :: map()
 
       @schemas unquote(opts)[:schemas] || raise("Schemas option required")
 
@@ -208,7 +206,7 @@ defmodule Coherence.SessionControllerBase do
         [user, user_schema, remember, lockable?, remember, params] = opts
 
         conn =
-          if lockable? && user.locked_at() do
+          if lockable? and user.locked_at do
             Controller.unlock!(user)
             track_unlock(conn, user, user_schema.trackable_table?())
           else
@@ -351,7 +349,7 @@ defmodule Coherence.SessionControllerBase do
 
           {:error, :invalid_token} ->
             # this is a case of potential fraud
-            Logger.warn("Invalid token. Potential Fraud.")
+            Logger.warning("Invalid token. Potential Fraud.")
 
             conn
             |> delete_req_header(opts[:login_key])
@@ -379,13 +377,11 @@ defmodule Coherence.SessionControllerBase do
         else
           id
           |> gen_cookie(series, token)
-          |> cred_store.delete_credentials
+          |> cred_store.delete_credentials()
 
           {changeset, new_token} = schema(Rememberable).update_login(rememberable)
 
-          cred_store.put_credentials(
-            {gen_cookie(id, series, new_token), Config.user_schema(), Config.schema_key()}
-          )
+          cred_store.put_credentials({gen_cookie(id, series, new_token), Config.user_schema(), Config.schema_key()})
 
           Config.repo().update!(changeset)
 
@@ -394,8 +390,9 @@ defmodule Coherence.SessionControllerBase do
             |> save_login_cookie(id, series, new_token, opts)
             |> assign(:remembered, true)
 
-          user = Config.repo.one(from u in Config.user_schema(), where: u.id == ^id)
-          conn = 
+          user = Config.repo().one(from(u in Config.user_schema(), where: u.id == ^id))
+
+          conn =
             Config.auth_module()
             |> apply(Config.create_login(), [conn, user, [id_key: Config.schema_key()]])
 
@@ -406,7 +403,7 @@ defmodule Coherence.SessionControllerBase do
       @doc """
       Save the login cookie.
       """
-      @spec save_login_cookie(conn, Integer.t(), String.t(), String.t(), Keyword.t()) :: conn
+      @spec save_login_cookie(conn(), integer(), String.t(), String.t(), Keyword.t()) :: conn()
       def save_login_cookie(conn, id, series, token, opts \\ []) do
         key = opts[:login_key] || "coherence_login"
         expire = opts[:cookie_expire] || 2 * 24 * 60 * 60

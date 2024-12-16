@@ -4,9 +4,9 @@ defmodule Coherence.Authentication.Utils do
   alias Coherence.Config
 
   @type conn :: Plug.Conn.t()
-  @type t :: Map.t()
+  @type t :: map()
 
-  @param_key Application.get_env(:coherence, :token_param_key, "param_key")
+  @param_key Application.compile_env(:coherence, :token_param_key, "param_key")
 
   @spec param_key() :: String.t()
   def param_key, do: @param_key
@@ -41,9 +41,10 @@ defmodule Coherence.Authentication.Utils do
 
   @spec delete_token_session(conn) :: conn
   def delete_token_session(conn) do
-    case get_session(conn, param_key()) do
-      nil -> conn
-      param -> put_session(conn, param, nil)
+    if param = get_session(conn, param_key()) do
+      put_session(conn, param, nil)
+    else
+      conn
     end
   end
 

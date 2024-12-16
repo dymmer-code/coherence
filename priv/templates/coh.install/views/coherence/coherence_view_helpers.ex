@@ -14,9 +14,12 @@ defmodule <%= web_base %>.Coherence.ViewHelpers do
 
   The link text uses gettext.
   """
-  use Phoenix.HTML
+  import Phoenix.HTML
+  import Phoenix.HTML.Form
+  use PhoenixHTMLHelpers
+
   alias Coherence.Config
-  import <%= web_base %>.Gettext
+  use Gettext, backend: <%= web_base %>.Gettext
 
   @type conn :: Plug.Conn.t()
   @type schema :: Ecto.Schema.t()

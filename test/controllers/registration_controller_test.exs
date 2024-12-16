@@ -55,7 +55,7 @@ defmodule CoherenceTest.RegistrationController do
       }
 
       conn = post conn, registration_path(conn, :create), params
-      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
+      assert Phoenix.Flash.get(conn.assigns.flash, "error") == "Mailer configuration required!"
       assert html_response(conn, 302)
     end
 
@@ -101,7 +101,7 @@ defmodule CoherenceTest.RegistrationController do
       }
 
       conn = post conn, registration_path(conn, :create), params
-      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
+      assert Phoenix.Flash.get(conn.assigns.flash, "error") == "Mailer configuration required!"
       assert html_response(conn, 302)
 
       %{:current_sign_in_ip => current_sign_in_ip} =
@@ -116,7 +116,7 @@ defmodule CoherenceTest.RegistrationController do
     test "can update registration with valid current password", %{conn: conn, user: user} do
       params = %{"registration" => %{"current_password" => user.password}}
       conn = put conn, registration_path(conn, :update), params
-      assert conn.private[:phoenix_flash] == %{"info" => "Account updated successfully."}
+      assert Phoenix.Flash.get(conn.assigns.flash, "info") == "Account updated successfully."
       assert html_response(conn, 302)
     end
 
@@ -150,7 +150,7 @@ defmodule CoherenceTest.RegistrationController do
       }
 
       conn = put conn, registration_path(conn, :update), params
-      assert conn.private[:phoenix_flash] == %{"info" => "Account updated successfully."}
+      assert Phoenix.Flash.get(conn.assigns.flash, "info") == "Account updated successfully."
       assert html_response(conn, 302)
       %{:current_sign_in_ip => current_sign_in_ip} = get_user_by_email(user.email)
       refute current_sign_in_ip == params["registration"]["current_sign_in_ip"]

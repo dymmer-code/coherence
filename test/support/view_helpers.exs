@@ -2,7 +2,8 @@ defmodule TestCoherenceWeb.ViewHelpers do
   @moduledoc """
   Helper functions for Coherence Views.
   """
-  use Phoenix.HTML
+  use PhoenixHTMLHelpers
+
   alias Coherence.Config
   alias Coherence.Messages
 
@@ -10,7 +11,7 @@ defmodule TestCoherenceWeb.ViewHelpers do
   @type schema :: Ecto.Schema.t()
 
   @seperator {:safe, "&nbsp; | &nbsp;"}
-  @helpers Module.concat(Application.get_env(:coherence, :web_module), Router.Helpers)
+  @helpers Module.concat(Application.compile_env(:coherence, :web_module), Router.Helpers)
 
   @recover_link Messages.backend().forgot_your_password()
   @unlock_link Messages.backend().send_an_unlock_email()
@@ -148,7 +149,7 @@ defmodule TestCoherenceWeb.ViewHelpers do
   def recover_link(_conn, _user_schema, false), do: []
 
   def recover_link(conn, user_schema, text) do
-    if user_schema.recoverable?, do: [recover_link(conn, text)], else: []
+    if user_schema.recoverable?(), do: [recover_link(conn, text)], else: []
   end
 
   @spec recover_link(conn, String.t()) :: tuple
@@ -159,7 +160,7 @@ defmodule TestCoherenceWeb.ViewHelpers do
   def register_link(_conn, _user_schema, false), do: []
 
   def register_link(conn, user_schema, text) do
-    if user_schema.registerable?, do: [register_link(conn, text)], else: []
+    if user_schema.registerable?(), do: [register_link(conn, text)], else: []
   end
 
   @spec register_link(conn, String.t()) :: tuple
@@ -196,7 +197,7 @@ defmodule TestCoherenceWeb.ViewHelpers do
   def confirmation_link(_conn, _user_schema, false), do: []
 
   def confirmation_link(conn, user_schema, text) do
-    if user_schema.confirmable?, do: [confirmation_link(conn, text)], else: []
+    if user_schema.confirmable?(), do: [confirmation_link(conn, text)], else: []
   end
 
   @spec confirmation_link(conn, String.t()) :: tuple
@@ -225,7 +226,7 @@ defmodule TestCoherenceWeb.ViewHelpers do
   end
 
   defp profile_link(current_user, conn) do
-    if Config.user_schema().registerable? do
+    if Config.user_schema().registerable?() do
       link(current_user.name, to: coherence_path(@helpers, :registration_path, conn, :show))
     else
       current_user.name

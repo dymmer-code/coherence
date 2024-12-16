@@ -13,8 +13,6 @@ defmodule Coherence.PasswordControllerBase do
   """
   defmacro __using__(opts) do
     quote location: :keep do
-      use Timex
-
       alias Coherence.{TrackableService, Messages, Schema, Controller}
 
       require Coherence.Config, as: Config
@@ -22,7 +20,7 @@ defmodule Coherence.PasswordControllerBase do
 
       @type schema :: Ecto.Schema.t()
       @type conn :: Plug.Conn.t()
-      @type params :: Map.t()
+      @type params :: map()
 
       @schemas unquote(opts)[:schemas] || raise("Schemas option required")
 
@@ -64,7 +62,7 @@ defmodule Coherence.PasswordControllerBase do
             |> redirect(to: logged_out_url(conn))
 
           user ->
-            if expired?(user.reset_password_sent_at, days: Config.reset_token_expire_days()) do
+            if expired?(user.reset_password_sent_at, day: Config.reset_token_expire_days()) do
               :password
               |> Controller.changeset(user_schema, user, clear_password_params())
               |> @schemas.update
@@ -96,7 +94,7 @@ defmodule Coherence.PasswordControllerBase do
             )
 
           user ->
-            if expired?(user.reset_password_sent_at, days: Config.reset_token_expire_days()) do
+            if expired?(user.reset_password_sent_at, day: Config.reset_token_expire_days()) do
               :password
               |> Controller.changeset(user_schema, user, clear_password_params())
               |> @schemas.update
@@ -122,7 +120,7 @@ defmodule Coherence.PasswordControllerBase do
               |> case do
                 {:ok, user} ->
                   conn
-                  |> TrackableService.track_password_reset(user, user_schema.trackable_table?)
+                  |> TrackableService.track_password_reset(user, user_schema.trackable_table?())
                   |> respond_with(
                     :password_update_success,
                     %{
@@ -156,7 +154,7 @@ defmodule Coherence.PasswordControllerBase do
           |> send_email_if_mailer(info, fn -> true end)
           |> respond_with(:password_create_success, %{params: params, info: info})
         else
-          changeset = Controller.changeset(:password, user_schema, user_schema.__struct__)
+          changeset = Controller.changeset(:password, user_schema, user_schema.__struct__())
           error = Messages.backend().could_not_find_that_email_address()
 
           conn

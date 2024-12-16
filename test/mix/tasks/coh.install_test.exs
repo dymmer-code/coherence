@@ -283,9 +283,7 @@ defmodule Mix.Tasks.Coh.InstallTest do
         mk_web_path()
         path = "migrations"
 
-        ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-views --no-templates --module=TestCoherence --migration-path=#{
-          path
-        })
+        ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-views --no-templates --module=TestCoherence --migration-path=#{path})
         |> Mix.Tasks.Coh.Install.run()
 
         assert [migration] = Path.wildcard("migrations/*_add_coherence_to_user.exs")
@@ -305,9 +303,8 @@ defmodule Mix.Tasks.Coh.InstallTest do
         mk_web_path()
         path = "migrations"
 
-        (~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-views --no-templates --module=TestCoherence --migration-path=#{
-           path
-         }) ++ ["--model=Client clients"])
+        (~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-views --no-templates --module=TestCoherence --migration-path=#{path}) ++
+           ["--model=Client clients"])
         |> Mix.Tasks.Coh.Install.run()
 
         assert [migration] = Path.wildcard("migrations/*create_coherence_client.exs")
@@ -331,9 +328,8 @@ defmodule Mix.Tasks.Coh.InstallTest do
         mk_web_path()
         path = "migrations"
 
-        (~w(--repo=TestCoherence.Repo  --full --log-only --no-views --no-templates --module=TestCoherence --migration-path=#{
-           path
-         }) ++ ["--model=Account accounts"])
+        (~w(--repo=TestCoherence.Repo  --full --log-only --no-views --no-templates --module=TestCoherence --migration-path=#{path}) ++
+           ["--model=Account accounts"])
         |> Mix.Tasks.Coh.Install.run()
 
         assert [migration] = Path.wildcard("migrations/*_add_coherence_to_account.exs")
@@ -545,7 +541,7 @@ defmodule Mix.Tasks.Coh.InstallTest do
         assert [migration] = Path.wildcard("migrations/*_add_coherence_to_user.exs")
 
         assert_file(migration, [
-          "alter table(:users) do"
+          "alter table(:accounts_users) do"
         ])
       end)
     end

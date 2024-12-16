@@ -200,7 +200,7 @@ defmodule Coherence.Schema do
           !!user.locked_at and
             !Coherence.Controller.expired?(
               user.locked_at,
-              minutes: Config.unlock_timeout_minutes()
+              minute: Config.unlock_timeout_minutes()
             )
         end
 
@@ -478,8 +478,7 @@ defmodule Coherence.Schema do
     authenticatable: ~w(#{Config.password_hash()} password password_confirmation),
     recoverable: ~w(reset_password_token reset_password_sent_at),
     rememberable: ~w(remember_created_at),
-    trackable:
-      ~w(sign_in_count current_sign_in_at last_sign_in_at current_sign_in_ip last_sign_in_ip),
+    trackable: ~w(sign_in_count current_sign_in_at last_sign_in_at current_sign_in_ip last_sign_in_ip),
     lockable: ~w(locked_at failed_attempts),
     unlockable_with_token: ~w(unlock_token),
     confirmable: ~w(confirmation_token confirmed_at confirmation_sent_at)

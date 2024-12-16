@@ -17,16 +17,26 @@ defmodule Coherence.CredentialStore.Session do
   """
   @behaviour Coherence.CredentialStore
 
-  @type t :: Ecto.Schema.t() | Map.t()
+  @type t :: Ecto.Schema.t() | map()
 
   require Logger
   alias Coherence.DbStore
   alias Coherence.CredentialStore.Server
   alias Coherence.CredentialStore.Types, as: T
 
-  @spec start_link() :: {:ok, pid} | {:error, atom}
-  def start_link do
-    Server.start_link()
+  def child_spec(opts) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [opts]},
+      type: :worker,
+      restart: :permanent,
+      shutdown: 500
+    }
+  end
+
+  @spec start_link([]) :: {:ok, pid} | {:error, atom}
+  def start_link([]) do
+    Server.start_link([])
   end
 
   @doc """
@@ -39,19 +49,11 @@ defmodule Coherence.CredentialStore.Session do
   end
 
   def get_user_data({credentials, db_model, id_key}) do
-    case get_data(credentials) do
-      nil ->
-        case DbStore.get_user_data(db_model.__struct__, credentials, id_key) do
-          nil ->
-            nil
-
-          user_data ->
-            Server.put_credentials(credentials, user_data)
-            user_data
-        end
-
-      other ->
-        other
+    with nil <- get_data(credentials),
+         user_data when user_data != nil <-
+           DbStore.get_user_data(db_model.__struct__(), credentials, id_key) do
+      Server.put_credentials(credentials, user_data)
+      user_data
     end
   end
 
@@ -74,13 +76,9 @@ defmodule Coherence.CredentialStore.Session do
   """
   @spec delete_credentials(T.credentials()) :: any
   def delete_credentials(credentials) do
-    case get_data(credentials) do
-      nil ->
-        nil
-
-      user_data ->
-        DbStore.delete_credentials(user_data, credentials)
-        Server.delete_credentials(credentials)
+    if user_data = get_data(credentials) do
+      DbStore.delete_credentials(user_data, credentials)
+      Server.delete_credentials(credentials)
     end
   end
 

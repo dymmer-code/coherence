@@ -36,11 +36,11 @@ defmodule Coherence.Schemas do
   end
 
   def change_user(params) do
-    Config.user_schema().changeset(Config.user_schema().__struct__, params)
+    Config.user_schema().changeset(Config.user_schema().__struct__(), params)
   end
 
   def change_user do
-    Config.user_schema().changeset(Config.user_schema().__struct__, %{})
+    Config.user_schema().changeset(Config.user_schema().__struct__(), %{})
   end
 
   def create_user(params) do
@@ -136,7 +136,7 @@ defmodule Coherence.Schemas do
       )
 
     case schema do
-      nil -> schema(Trackable).__struct__
+      nil -> schema(Trackable).__struct__()
       trackable -> trackable
     end
   end

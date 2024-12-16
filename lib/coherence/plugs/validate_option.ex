@@ -21,7 +21,7 @@ defmodule Coherence.ValidateOption do
     %{option: options}
   end
 
-  @spec call(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec call(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def call(conn, opts) do
     if Coherence.Config.has_option(opts[:option]) do
       conn

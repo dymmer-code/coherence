@@ -4,6 +4,9 @@ defmodule Plug.Adapters.CoherenceTest.Conn do
 
   ## Test helpers
 
+  @impl Plug.Conn.Adapter
+  def upgrade(payload, _protocol, _opts), do: {:ok, payload}
+
   def conn(conn, method, uri, body_or_params) do
     maybe_flush()
 
@@ -53,6 +56,7 @@ defmodule Plug.Adapters.CoherenceTest.Conn do
 
   ## Connection adapter
 
+  @impl Plug.Conn.Adapter
   def send_resp(%{method: "HEAD"} = state, status, headers, _body) do
     do_send(state, status, headers, "")
   end
@@ -61,6 +65,7 @@ defmodule Plug.Adapters.CoherenceTest.Conn do
     do_send(state, status, headers, IO.iodata_to_binary(body))
   end
 
+  @impl Plug.Conn.Adapter
   def send_file(%{method: "HEAD"} = state, status, headers, _path, _offset, _length) do
     do_send(state, status, headers, "")
   end
@@ -82,8 +87,10 @@ defmodule Plug.Adapters.CoherenceTest.Conn do
     do_send(state, status, headers, data)
   end
 
+  @impl Plug.Conn.Adapter
   def send_chunked(state, _status, _headers), do: {:ok, "", %{state | chunks: ""}}
 
+  @impl Plug.Conn.Adapter
   def chunk(%{method: "HEAD"} = state, _body), do: {:ok, "", state}
 
   def chunk(%{chunks: chunks} = state, body) do
@@ -96,6 +103,7 @@ defmodule Plug.Adapters.CoherenceTest.Conn do
     {:ok, body, state}
   end
 
+  @impl Plug.Conn.Adapter
   def read_req_body(%{req_body: body} = state, opts \\ []) do
     size = min(byte_size(body), Keyword.get(opts, :length, 8_000_000))
     data = :binary.part(body, 0, size)
@@ -110,20 +118,24 @@ defmodule Plug.Adapters.CoherenceTest.Conn do
     {tag, data, %{state | req_body: rest}}
   end
 
+  @impl Plug.Conn.Adapter
   def inform(%{owner: owner, ref: ref}, status, headers) do
     send(owner, {ref, :inform, {status, headers}})
     :ok
   end
 
+  @impl Plug.Conn.Adapter
   def push(%{owner: owner, ref: ref}, path, headers) do
     send(owner, {ref, :push, {path, headers}})
     :ok
   end
 
+  @impl Plug.Conn.Adapter
   def get_peer_data(%{peer: {ip, port}, cert: cert}) do
     %{address: ip, port: port, ssl_cert: cert}
   end
 
+  @impl Plug.Conn.Adapter
   def get_http_protocol(payload) do
     Map.fetch!(payload, :http_protocol)
   end

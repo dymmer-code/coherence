@@ -6,9 +6,11 @@ defmodule TestCoherenceWeb.Coherence do
       import Phoenix.Controller, only: [get_csrf_token: 0, get_flash: 2, view_module: 1]
 
       # Use all HTML functionality (forms, tags, etc)
-      use Phoenix.HTML
+      import Phoenix.HTML
+      import Phoenix.HTML.Form
+      use PhoenixHTMLHelpers
+      use Gettext, backend: TestCoherenceWeb.Gettext
 
-      import TestCoherenceWeb.Gettext
       alias TestCoherenceWeb.Router.Helpers, as: Routes
       import TestCoherenceWeb.ViewHelpers
     end

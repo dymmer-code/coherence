@@ -17,7 +17,7 @@ defmodule Coherence.Authentication.Basic do
     {:nowarn_function, halt_with_login: 3}
   ]
 
-  @type t :: Ecto.Schema.t() | Map.t()
+  @type t :: Ecto.Schema.t() | map()
   @type conn :: Plug.Conn.t()
 
   @behaviour Plug

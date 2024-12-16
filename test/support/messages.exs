@@ -12,7 +12,7 @@ defmodule TestCoherenceWeb.Coherence.Messages do
   """
   @behaviour Coherence.Messages
 
-  import TestCoherenceWeb.Gettext
+  use Gettext, backend: TestCoherenceWeb.Gettext
 
   # Change this to override the "coherence" gettext domain. If you would like
   # the coherence message to be part of your projects domain change it to "default"

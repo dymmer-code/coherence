@@ -9,7 +9,6 @@ defmodule Coherence.Mixfile do
       version: @version,
       elixir: "~> 1.10",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       docs: [extras: ["README.md"], main: "Coherence"],
@@ -23,11 +22,10 @@ defmodule Coherence.Mixfile do
     ]
   end
 
-  # Configuration for the OTP application
   def application do
     [
       mod: {Coherence, []},
-      extra_applications: [:logger, :tzdata]
+      extra_applications: [:logger]
     ]
   end
 
@@ -36,22 +34,22 @@ defmodule Coherence.Mixfile do
 
   defp deps do
     [
-      {:ecto_sql, "~> 3.5"},
-      {:bcrypt_elixir, "~> 2.2"},
-      {:phoenix, "~> 1.5"},
-      {:phoenix_html, "~> 2.14"},
-      {:gettext, "~> 0.18"},
-      {:elixir_uuid, "~> 1.2"},
-      {:phoenix_swoosh, "~> 0.3"},
-      {:timex, "~> 3.6"},
-      {:floki, "~> 0.29", only: :test},
-      {:ex_doc, "~> 0.23", only: :dev},
-      {:earmark, "~> 1.4", only: :dev, override: true},
+      {:ecto_sql, "~> 3.12"},
+      {:bcrypt_elixir, "~> 3.2"},
+      {:phoenix, "~> 1.7"},
+      {:phoenix_html, "~> 4.1"},
+      {:phoenix_html_helpers, "~> 1.0"},
+      {:gettext, "~> 0.26"},
+      {:phoenix_swoosh, "~> 1.2"},
+      {:tzdata, "~> 1.1"},
+      {:floki, "~> 0.37", only: :test},
+      {:ex_doc, ">= 0.0.0", only: :dev},
+      {:earmark, "~> 1.4", only: :dev},
       {:postgrex, ">= 0.0.0", only: :test},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:credo, "~> 1.4", only: [:dev, :test]},
-      {:plug, "~> 1.10"},
-      {:jason, "~> 1.2"}
+      {:dialyxir, ">= 0.0.0", only: [:dev], runtime: false},
+      {:credo, ">= 0.0.0", only: [:dev, :test]},
+      {:plug, "~> 1.16"},
+      {:jason, "~> 1.4"}
     ]
   end
 

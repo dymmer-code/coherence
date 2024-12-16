@@ -158,16 +158,11 @@ defmodule Coherence.Config do
   """
   @spec email_from() :: {nil, nil} | {String.t(), String.t()} | String.t()
   def email_from do
-    case get_application_env(:email_from) do
-      nil ->
-        {get_application_env(:email_from_name), get_application_env(:email_from_email)}
-
-      email ->
-        Logger.info(
-          "email_from config is deprecated. Use email_from_name and email_from_email instead"
-        )
-
-        email
+    if email = get_application_env(:email_from) do
+      Logger.info("email_from config is deprecated. Use email_from_name and email_from_email instead")
+      email
+    else
+      {get_application_env(:email_from_name), get_application_env(:email_from_email)}
     end
   end
 
@@ -184,8 +179,7 @@ defmodule Coherence.Config do
   def email_reply_to do
     case get_application_env(:email_reply_to) do
       nil ->
-        case {get_application_env(:email_reply_to_name),
-              get_application_env(:email_reply_to_email)} do
+        case {get_application_env(:email_reply_to_name), get_application_env(:email_reply_to_email)} do
           {nil, nil} -> nil
           email -> email
         end
@@ -194,7 +188,7 @@ defmodule Coherence.Config do
         true
 
       email ->
-        Logger.info(
+        Logger.warning(
           "email_reply_to {name, email} config is deprecated. Use email_reply_to_name and email_reply_to_email instead"
         )
 
@@ -244,11 +238,7 @@ defmodule Coherence.Config do
   end
 
   defp has_any_option?(fun) do
-    if opts() == :all do
-      true
-    else
-      Enum.any?(opts(), &fun.(standardize_option(&1)))
-    end
+    opts() == :all or Enum.any?(opts(), &fun.(standardize_option(&1)))
   end
 
   defp standardize_option(option) when is_atom(option), do: {option, :all}
@@ -319,7 +309,7 @@ defmodule Coherence.Config do
         config
 
       true ->
-        Logger.info("The configuration for default_routes must be a map")
+        Logger.warning("The configuration for default_routes must be a map")
         nil
     end
   end

@@ -62,7 +62,7 @@ defmodule CoherenceTest.Rememberable do
 
     test "expired", %{conn: conn} = meta do
       {rememberable, _, _} = meta[:rememberable]
-      datetime = Timex.shift(rememberable.token_created_at, months: -1)
+      datetime = NaiveDateTime.shift(rememberable.token_created_at, month: -1)
 
       Rememberable.changeset(rememberable, %{token_created_at: datetime})
       |> TestCoherence.Repo.update!()

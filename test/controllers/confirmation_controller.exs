@@ -13,7 +13,7 @@ defmodule CoherenceTest.ConfirmationController do
         password_hash: "superhash",
         unconfirmed_email: "unconfirmed@example.com",
         confirmation_token: "foobar",
-        confirmation_sent_at: Timex.now()
+        confirmation_sent_at: NaiveDateTime.utc_now()
       }
       |> TestCoherence.Repo.insert!()
 
@@ -36,7 +36,7 @@ defmodule CoherenceTest.ConfirmationController do
 
     test "should respond with error if user is confirmed", %{conn: conn, user: user} do
       user
-      |> Ecto.Changeset.change(%{confirmed_at: Timex.now()})
+      |> Ecto.Changeset.change(%{confirmed_at: NaiveDateTime.utc_now()})
       |> TestCoherence.Repo.update!()
 
       conn =
@@ -56,7 +56,7 @@ defmodule CoherenceTest.ConfirmationController do
 
       user
       |> Ecto.Changeset.change(%{
-        confirmed_at: Timex.now(),
+        confirmed_at: NaiveDateTime.utc_now(),
         unconfirmed_email: "unconfirmed@example.com"
       })
       |> TestCoherence.Repo.update!()

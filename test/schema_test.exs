@@ -1,7 +1,6 @@
 defmodule CoherenceTest.Schema do
   use TestCoherence.ModelCase
   alias TestCoherence.User
-  use Timex
 
   setup do
     :ok
@@ -97,16 +96,14 @@ defmodule CoherenceTest.Schema do
 
     refute cs.valid?
 
-    assert (cs.errors == [
-             password:
-               {"should be at least %{count} character(s)",
-                [count: 4, validation: :length, kind: :min]}
-           ]) || (
-            cs.errors == [
-              password:
-                {"should be at least %{count} character(s)",
-                 [count: 4, validation: :length, kind: :min, type: :string]}
-            ]) 
+    assert cs.errors == [
+             password: {"should be at least %{count} character(s)", [count: 4, validation: :length, kind: :min]}
+           ] ||
+             cs.errors == [
+               password:
+                 {"should be at least %{count} character(s)",
+                  [count: 4, validation: :length, kind: :min, type: :string]}
+             ]
   end
 
   test "checkpw" do

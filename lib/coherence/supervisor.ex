@@ -15,12 +15,11 @@ defmodule Coherence.Supervisor do
 
   @doc false
   def init(:ok) do
-    import Supervisor.Spec
     use Coherence.Config
 
     children =
       [
-        worker(get_credential_store(), [])
+        get_credential_store()
       ]
       |> build_children(Config.has_option(:rememberable))
 

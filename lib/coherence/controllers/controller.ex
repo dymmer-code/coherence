@@ -13,7 +13,7 @@ defmodule Coherence.Controller do
   @type changeset :: Ecto.Changeset.t()
   @type schema_or_error :: schema | {:error, changeset}
   @type conn :: Plug.Conn.t()
-  @type params :: Map.t()
+  @type params :: map() | Keyword.t()
 
   @doc """
   Put LayoutView
@@ -34,7 +34,7 @@ defmodule Coherence.Controller do
   end
 
   defp check_for_coherence(conn, "Coherence") do
-    put_layout(conn, {Module.concat(Config.web_module(), LayoutView), :app})
+    put_layout(conn, html: {Module.concat(Config.web_module(), LayoutView), :app})
   end
 
   defp check_for_coherence(conn, _), do: conn
@@ -44,9 +44,10 @@ defmodule Coherence.Controller do
   """
   @spec set_view(Plug.Conn.t(), Keyword.t()) :: Plug.Conn.t()
   def set_view(conn, opts) do
-    case opts[:view] do
-      nil -> conn
-      view -> put_view(conn, Module.concat(Config.web_module(), view))
+    if view = opts[:view] do
+      put_view(conn, Module.concat(Config.web_module(), view))
+    else
+      conn
     end
   end
 
@@ -93,46 +94,27 @@ defmodule Coherence.Controller do
   @doc """
   Test if a datetime has expired.
 
-  Convert the datetime from NaiveDateTime format to Timex format to do
-  the comparison given the time during in opts.
+  Do the comparison given the time during in opts.
 
   ## Examples
 
-      expired?(user.expire_at, days: 5)
-      expired?(user.expire_at, minutes: 10)
+      expired?(user.expire_at, day: 5)
+      expired?(user.expire_at, minute: 10)
 
       iex> NaiveDateTime.utc_now()
-      ...> |> Coherence.Controller.expired?(days: 1)
+      ...> |> Coherence.Controller.expired?(day: 1)
       false
 
       iex> NaiveDateTime.utc_now()
-      ...> |> Coherence.Controller.shift(days: -2)
-      ...> |> Coherence.Controller.expired?(days: 1)
+      ...> |> NaiveDateTime.shift(day: -2)
+      ...> |> Coherence.Controller.expired?(day: 1)
       true
   """
   @spec expired?(nil | struct, Keyword.t()) :: boolean
   def expired?(nil, _), do: true
 
   def expired?(datetime, opts) do
-    not Timex.before?(Timex.now(), shift(datetime, opts))
-  end
-
-  @doc """
-  Shift a NaiveDateTime.
-
-  ## Examples
-
-      iex> ~N(2016-10-10 10:10:10)
-      ...> |> Coherence.Controller.shift(days: -2)
-      ...> |> to_string
-      "2016-10-08 10:10:10Z"
-  """
-  @spec shift(struct, Keyword.t()) :: struct
-  def shift(datetime, opts) do
-    datetime
-    |> NaiveDateTime.to_erl()
-    |> Timex.to_datetime()
-    |> Timex.shift(opts)
+    not NaiveDateTime.before?(NaiveDateTime.utc_now(), NaiveDateTime.shift(datetime, opts))
   end
 
   @doc """
@@ -170,7 +152,7 @@ defmodule Coherence.Controller do
   """
   @spec send_confirmation(Plug.Conn.t(), Ecto.Schema.t(), module) :: Plug.Conn.t()
   def send_confirmation(conn, user, user_schema) do
-    if user_schema.confirmable? do
+    if user_schema.confirmable?() do
       token = random_string(48)
       url = router_helpers().confirmation_url(conn, :edit, token)
       Logger.debug("confirmation email url: #{inspect(url)}")
@@ -360,8 +342,8 @@ defmodule Coherence.Controller do
     |> apply(Config.delete_login(), [conn, [id_key: Config.schema_key()] ++ opts])
     |> TrackableService.track_logout(
       user,
-      user.__struct__.trackable?,
-      user.__struct__.trackable_table?
+      user.__struct__.trackable?(),
+      user.__struct__.trackable_table?()
     )
     |> RememberableService.delete_rememberable(user)
   end
@@ -397,7 +379,7 @@ defmodule Coherence.Controller do
 
   Same as Rails permit, prevents mass assignment attacks.
   """
-  @spec permit(Map.t(), List.t()) :: Map.t()
+  @spec permit(map(), list()) :: map()
   def permit(_, nil), do: %{}
   def permit(params, permitted), do: params |> Map.take(permitted)
 end

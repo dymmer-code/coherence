@@ -3,8 +3,6 @@ defmodule Coherence.Rememberable do
 
   defmacro __using__(_) do
     quote do
-      use Timex
-
       alias Coherence.Config
       alias __MODULE__
 
@@ -57,7 +55,9 @@ defmodule Coherence.Rememberable do
       @spec delete_expired_tokens() :: Ecto.Queryable.all()
       def delete_expired_tokens do
         expire_datetime =
-          Timex.shift(Timex.now(), hours: -Config.rememberable_cookie_expire_hours())
+          NaiveDateTime.shift(NaiveDateTime.utc_now(),
+            hour: -Config.rememberable_cookie_expire_hours()
+          )
 
         from(p in Rememberable, where: p.token_created_at < ^expire_datetime)
       end
@@ -68,7 +68,7 @@ defmodule Coherence.Rememberable do
       @spec hash(String.t()) :: String.t()
       def hash(string) do
         :sha
-        |> :crypto.hash(String.to_charlist(string))
+        |> :crypto.hash(to_charlist(string))
         |> Base.url_encode64()
       end
 
@@ -78,7 +78,7 @@ defmodule Coherence.Rememberable do
         cookie <> " : #{hash(series)}  #{hash(token)}"
       end
 
-      def created_at, do: Timex.now()
+      def created_at, do: NaiveDateTime.utc_now()
 
       def gen_token do
         Coherence.Controller.random_string(24)

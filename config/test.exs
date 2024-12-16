@@ -1,6 +1,4 @@
-use Mix.Config
-
-# config :coherence, ecto_repos: [TestCoherence.Repo]
+import Config
 
 config :logger, level: :error
 

@@ -400,7 +400,7 @@ defmodule Mix.Tasks.Coh.Clean do
 
     switch_keys = Keyword.keys(@switches)
 
-    case opts |> Keyword.keys() |> Enum.filter(&(not (&1 in switch_keys))) do
+    case opts |> Keyword.keys() |> Enum.filter(&(&1 not in switch_keys)) do
       [] -> opts
       list -> raise_option_errors(list)
     end
@@ -418,10 +418,10 @@ defmodule Mix.Tasks.Coh.Clean do
   end
 
   defp lib_path, do: Path.join("lib", otp_app())
+
   defp lib_path(path) when is_binary(path), do: Path.join(lib_path(), path)
-  defp lib_path(paths), do: Path.join([lib_path() | paths])
 
   defp otp_app do
-    Mix.Project.config()[:app] |> to_string
+    Mix.Project.config()[:app] |> to_string()
   end
 end

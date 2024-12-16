@@ -106,7 +106,7 @@ defmodule Coherence.CredentialStore.Server.Test do
   ###############
   # Helpers
 
-  defp uuid, do: UUID.uuid1()
+  defp uuid, do: Ecto.UUID.generate()
 
   defp put_credentials(state, credentials, user_data) do
     {:noreply, state1} = Server.handle_cast({:put_credentials, credentials, user_data}, state)

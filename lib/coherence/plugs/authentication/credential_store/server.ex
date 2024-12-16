@@ -13,8 +13,7 @@ defmodule Coherence.CredentialStore.Server do
   ###################
   # Public API
 
-  @spec start_link() :: {:ok, pid}
-  def start_link do
+  def start_link([]) do
     GenServer.start_link(__MODULE__, [], name: @name)
   end
 
@@ -32,7 +31,7 @@ defmodule Coherence.CredentialStore.Server do
     GenServer.cast(@name, {:delete_user_logins, user_data})
   end
 
-  @spec get_user_data(T.credentials()) :: T.user_data()
+  @spec get_user_data(T.credentials()) :: T.user_data() | nil
   def get_user_data(credentials) do
     GenServer.call(@name, {:get_user_data, credentials})
   end

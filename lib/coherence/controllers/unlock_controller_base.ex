@@ -9,7 +9,6 @@ defmodule Coherence.UnlockControllerBase do
   """
   defmacro __using__(opts) do
     quote location: :keep do
-      use Timex
       use Coherence.Config
 
       alias Coherence.{TrackableService, LockableService, Messages, Schema, Controller}
@@ -21,7 +20,7 @@ defmodule Coherence.UnlockControllerBase do
 
       @type schema :: Ecto.Schema.t()
       @type conn :: Plug.Conn.t()
-      @type params :: Map.t()
+      @type params :: map()
 
       def schema(which), do: Coherence.Schemas.schema(which)
 
@@ -102,7 +101,7 @@ defmodule Coherence.UnlockControllerBase do
               Controller.unlock!(user)
 
               conn
-              |> TrackableService.track_unlock_token(user, user_schema.trackable_table?)
+              |> TrackableService.track_unlock_token(user, user_schema.trackable_table?())
               |> respond_with(:unlock_update_success, %{
                 params: params,
                 info: Messages.backend().your_account_has_been_unlocked()

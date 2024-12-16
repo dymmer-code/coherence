@@ -31,7 +31,7 @@ defmodule CoherenceTest.InvitationController do
     test "can invite new user", %{conn: conn} do
       params = %{"invitation" => %{"name" => "John Doe", "email" => "john@example.com"}}
       conn = post conn, invitation_path(conn, :create), params
-      assert conn.private[:phoenix_flash] == %{"info" => "Invitation sent."}
+      assert Phoenix.Flash.get(conn.assigns.flash, "info") == "Invitation sent."
       assert html_response(conn, 302)
     end
 
@@ -67,9 +67,8 @@ defmodule CoherenceTest.InvitationController do
       params = %{"user" => %{}, "token" => token}
       conn = post conn, invitation_path(conn, :create_user), params
 
-      assert conn.private[:phoenix_flash] == %{
-               "error" => "Invalid Invitation. Please contact the site administrator."
-             }
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               "Invalid Invitation. Please contact the site administrator."
 
       assert html_response(conn, 302)
     end
@@ -83,7 +82,7 @@ defmodule CoherenceTest.InvitationController do
       }
 
       conn = post conn, invitation_path(conn, :create_user), params
-      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
+      assert Phoenix.Flash.get(conn.assigns.flash, "error") == "Mailer configuration required!"
       assert html_response(conn, 302)
     end
   end
@@ -102,7 +101,7 @@ defmodule CoherenceTest.InvitationController do
     }
 
     conn = post conn, invitation_path(conn, :create_user), params
-    assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
+    assert Phoenix.Flash.get(conn.assigns.flash, "error") == "Mailer configuration required!"
     assert html_response(conn, 302)
     %{:current_sign_in_ip => current_sign_in_ip} = get_user_by_email(params["user"]["email"])
     refute current_sign_in_ip == params["user"]["current_sign_in_ip"]

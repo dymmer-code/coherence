@@ -159,7 +159,7 @@ defmodule Coherence.ConfirmableService do
   @spec expired?(Ecto.Schema.t()) :: boolean
   def expired?(user) do
     for_option(fn ->
-      expired?(user.confirmation_sent_at, days: Config.confirmation_token_expire_days())
+      expired?(user.confirmation_sent_at, day: Config.confirmation_token_expire_days())
     end)
   end
 
@@ -173,7 +173,7 @@ defmodule Coherence.ConfirmableService do
     for_option(fn ->
       case Config.allow_unconfirmed_access_for() do
         0 -> false
-        days -> not expired?(user.confirmation_sent_at, days: days)
+        days -> not expired?(user.confirmation_sent_at, day: days)
       end
     end)
   end

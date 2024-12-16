@@ -56,10 +56,10 @@ defmodule Coherence.Authentication.Session do
 
   require Logger
 
-  @type t :: Ecto.Schema.t() | Map.t()
+  @type t :: Ecto.Schema.t() | map()
   @type conn :: Plug.Conn.t()
 
-  @session_key Application.get_env(:coherence, :session_key, "session_auth")
+  @session_key Application.compile_env(:coherence, :session_key, "session_auth")
 
   @dialyzer [
     {:nowarn_function, call: 2},
@@ -77,7 +77,7 @@ defmodule Coherence.Authentication.Session do
   def create_login(conn, user_data, opts \\ []) do
     id_key = Keyword.get(opts, :id_key, :id)
     store = Keyword.get(opts, :store, Coherence.CredentialStore.Session)
-    id = UUID.uuid1()
+    id = Ecto.UUID.generate()
 
     store.put_credentials({id, user_data, id_key})
     put_session(conn, @session_key, id)
@@ -144,19 +144,11 @@ defmodule Coherence.Authentication.Session do
           fun
 
         other ->
-          case opts[:protected] do
-            nil -> other
-            true -> true
-            other -> other
-          end
+          opts[:protected] || other
       end
 
     rememberable? =
-      if Config.has_option(:rememberable) do
-        Config.user_schema().rememberable?
-      else
-        false
-      end
+      Config.has_option(:rememberable) and Config.user_schema().rememberable?()
 
     %{
       login: login,

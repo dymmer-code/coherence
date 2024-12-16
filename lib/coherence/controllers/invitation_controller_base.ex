@@ -12,8 +12,6 @@ defmodule Coherence.InvitationControllerBase do
   """
   defmacro __using__(opts) do
     quote location: :keep do
-      use Timex
-
       import Ecto.Changeset
 
       alias Coherence.{Config, Messages, Schema, Controller}
@@ -25,7 +23,7 @@ defmodule Coherence.InvitationControllerBase do
 
       @type schema :: Ecto.Schema.t()
       @type conn :: Plug.Conn.t()
-      @type params :: Map.t()
+      @type params :: map()
 
       def schema(which), do: Coherence.Schemas.schema(which)
 
@@ -71,8 +69,7 @@ defmodule Coherence.InvitationControllerBase do
               |> add_error(:email, Messages.backend().user_already_has_an_account())
               |> struct(action: true)
 
-            conn
-            |> respond_with(:invitation_create_error, %{changeset: changeset})
+            respond_with(conn, :invitation_create_error, %{changeset: changeset})
         end
       end
 
@@ -81,8 +78,8 @@ defmodule Coherence.InvitationControllerBase do
           {:ok, invitation} ->
             send_user_email(:invitation, invitation, url)
 
-            conn
-            |> respond_with(
+            respond_with(
+              conn,
               :invitation_create_success,
               %{
                 params: params,
@@ -92,13 +89,11 @@ defmodule Coherence.InvitationControllerBase do
 
           {:error, changeset} ->
             {conn, changeset} =
-              case @schemas.get_by_invitation(email: email) do
-                nil ->
-                  {conn, changeset}
-
-                invitation ->
-                  {assign(conn, :invitation, invitation),
-                   add_error(changeset, :email, Messages.backend().invitation_already_sent())}
+              if invitation = @schemas.get_by_invitation(email: email) do
+                {assign(conn, :invitation, invitation),
+                 add_error(changeset, :email, Messages.backend().invitation_already_sent())}
+              else
+                {conn, changeset}
               end
 
             respond_with(conn, :invitation_create_error, %{changeset: changeset})
@@ -115,25 +110,22 @@ defmodule Coherence.InvitationControllerBase do
       def edit(conn, params) do
         token = params["id"]
 
-        case @schemas.get_by_invitation(token: token) do
-          nil ->
-            conn
-            |> put_flash(:error, Messages.backend().invalid_invitation_token())
-            |> redirect(to: logged_out_url(conn))
+        if invite = @schemas.get_by_invitation(token: token) do
+          user_schema = Config.user_schema()
 
-          invite ->
-            user_schema = Config.user_schema()
+          changeset =
+            Controller.changeset(
+              :invitation,
+              user_schema,
+              user_schema.__struct__(),
+              Map.take(invite, Config.forwarded_invitation_fields())
+            )
 
-            changeset =
-              Controller.changeset(
-                :invitation,
-                user_schema,
-                user_schema.__struct__,
-                Map.take(invite, Config.forwarded_invitation_fields())
-              )
-
-            conn
-            |> render(:edit, changeset: changeset, token: invite.token)
+          render(conn, :edit, changeset: changeset, token: invite.token)
+        else
+          conn
+          |> put_flash(:error, Messages.backend().invalid_invitation_token())
+          |> redirect(to: logged_out_url(conn))
         end
       end
 
@@ -161,7 +153,7 @@ defmodule Coherence.InvitationControllerBase do
             :invitation
             |> Controller.changeset(
               user_schema,
-              user_schema.__struct__,
+              user_schema.__struct__(),
               Controller.permit(
                 params["user"],
                 Config.registration_permitted_attributes() ||

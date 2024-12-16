@@ -9,10 +9,12 @@ defmodule <%= web_module %> do
       import Phoenix.Controller, only: [get_csrf_token: 0, get_flash: 2, view_module: 1]
 
       # Use all HTML functionality (forms, tags, etc)
-      use Phoenix.HTML
+      import Phoenix.HTML
+      import Phoenix.HTML.Form
+      use PhoenixHTMLHelpers
+      use Gettext, backend: <%= web_base %>.Gettext
 
       import <%= web_base %>.ErrorHelpers
-      import <%= web_base %>.Gettext
       import <%= web_base %>.Coherence.ViewHelpers
 
       alias <%= web_base %>.Router.Helpers, as: Routes
@@ -23,12 +25,11 @@ defmodule <%= web_module %> do
     quote do
       use Phoenix.Controller, except: [layout_view: 2]
       use Coherence.Config
-      use Timex
+      use Gettext, backend: <%= web_base %>.Gettext
 
       import Ecto
       import Ecto.Query
       import Plug.Conn
-      import <%= web_base %>.Gettext
       import Coherence.Controller
 
       alias Coherence.Config

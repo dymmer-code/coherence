@@ -1,6 +1,5 @@
 defmodule Coherence.RememberableTest do
   use TestCoherence.ModelCase
-  use Timex
 
   alias Coherence.Config
   alias TestCoherence.Coherence.Rememberable
@@ -17,8 +16,8 @@ defmodule Coherence.RememberableTest do
     {:ok, user: user}
   end
 
-  @test_date Timex.parse!("2010-04-17 14:00:00", "%Y-%m-%d %H:%M:%S", :strftime)
-             |> Timex.to_datetime()
+  @test_date NaiveDateTime.from_iso8601!("2010-04-17 14:00:00")
+
   @valid_attrs %{
     user_id: 1,
     series_hash: "1234",
@@ -60,7 +59,7 @@ defmodule Coherence.RememberableTest do
     refute new_changes[:token_hash] == changes[:token_hash]
   end
 
-  def now, do: Timex.now()
+  def now, do: NaiveDateTime.utc_now()
 
   def rememberables,
     do: [
